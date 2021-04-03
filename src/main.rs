@@ -33,7 +33,7 @@ fn main() {
     let mut fmt = dev.format().expect("Failed to read format");
     fmt.width = 1280;
     fmt.height = 720;
-    fmt.fourcc = FourCC::new(b"MJPG");
+    fmt.fourcc = FourCC::new(b"MP42");
     dev.set_format(&fmt).expect("Failed to write format");
 
 
