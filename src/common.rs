@@ -1,0 +1,1 @@
+pub static SOCKET_PATH: &'static str = "192.168.50.95:3000";
