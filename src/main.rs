@@ -23,7 +23,7 @@ fn main() {
     println!("Using device: {}\n", source);
 
     // Capture 4 frames by default
-    let count = 100;
+    let count = 1;
 
     // Allocate 4 buffers by default
     let buffers = 4;
@@ -66,7 +66,7 @@ fn main() {
         // tcp_stream.write(buf).unwrap();
         // tcp_stream.write("\0").unwrap();
 
-        fs::write_all("./videos/video0.mp4", buf).unwrap();
+        fs::write("./videos/video0.mp4", buf).unwrap();
         // fs::write("./videos/video0.mp4", b"\n").unwrap();
 
         let cur = buf.len() as f64 / 1_048_576.0 * 1_000_000.0 / duration_us as f64;
