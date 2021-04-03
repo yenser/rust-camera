@@ -33,7 +33,7 @@ fn main() {
     let mut fmt = dev.format().expect("Failed to read format");
     fmt.width = 1280;
     fmt.height = 720;
-    fmt.fourcc = FourCC::new(b"MP4V");
+    fmt.fourcc = FourCC::new(b"X264");
     dev.set_format(&fmt).expect("Failed to write format");
 
 
