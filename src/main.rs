@@ -4,13 +4,13 @@ mod common;
 
 use common::SOCKET_PATH;
 
-use std::fs;
 use std::time::Instant;
 use std::net::TcpStream;
 use std::io::Write;
 
 use v4l::buffer::Type;
 use v4l::io::traits::CaptureStream;
+use std::time::Duration;
 use v4l::prelude::*;
 use v4l::video::Capture;
 use v4l::FourCC;
@@ -33,7 +33,7 @@ fn main() {
     let mut fmt = dev.format().expect("Failed to read format");
     fmt.width = 1280;
     fmt.height = 720;
-    fmt.fourcc = FourCC::new(b"MP42");
+    fmt.fourcc = FourCC::new(b"JPEG");
     dev.set_format(&fmt).expect("Failed to write format");
 
 
@@ -48,14 +48,13 @@ fn main() {
     // warmup
     stream.next().unwrap();
 
-    // let mut tcp_stream = TcpStream::connect(SOCKET_PATH).unwrap();
+    let timeout = Duration::from_secs(5);
+    let mut tcp_stream = TcpStream::connect_timeout(&SOCKET_PATH.parse().unwrap(), timeout).unwrap();
 
     let start = Instant::now();
     let mut megabytes_ps: f64 = 0.0;
 
-    fs::create_dir_all("./videos/").unwrap();
-    
-    // tcp_stream.write(&format.size.to_be_bytes()).unwrap();
+    tcp_stream.write(&format.size.to_be_bytes()).unwrap();
 
 
     for i in 0..count {
@@ -63,11 +62,7 @@ fn main() {
         let (buf, meta) = stream.next().unwrap();
         let duration_us = t0.elapsed().as_micros();
 
-        // tcp_stream.write(buf).unwrap();
-        // tcp_stream.write("\0").unwrap();
-
-        fs::write("./videos/video0.mp4", buf).unwrap();
-        // fs::write("./videos/video0.mp4", b"\n").unwrap();
+        tcp_stream.write(buf).unwrap();
 
         let cur = buf.len() as f64 / 1_048_576.0 * 1_000_000.0 / duration_us as f64;
         if i == 0 {
