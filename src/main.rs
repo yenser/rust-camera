@@ -17,6 +17,8 @@ use v4l::prelude::*;
 use v4l::video::Capture;
 use v4l::FourCC;
 
+pub static FILE_NAME: &'static str = "carrack.jpg";
+
 fn get_device(name: &str) -> Result<v4l::Device, Error> {
     let source: String = String::from(name);
     println!("Using device: {}\n", source);
@@ -25,10 +27,6 @@ fn get_device(name: &str) -> Result<v4l::Device, Error> {
 }
 
 fn get_camera_stream() -> Result<(v4l::prelude::MmapStream<'static>, v4l::Format), Error> {
-    // Determine which device to use
-
-    // Capture 4 frames by default
-    // let count = 100;
 
     // Allocate 4 buffers by default
     let buffers = 4;
@@ -53,7 +51,7 @@ fn get_camera_stream() -> Result<(v4l::prelude::MmapStream<'static>, v4l::Format
     Ok((stream, format))
 }
 
-fn connect(
+fn connect_and_write(
     stream: &mut v4l::prelude::MmapStream<'static>,
     format: &v4l::Format,
 ) -> Result<(), Error> {
@@ -63,10 +61,11 @@ fn connect(
     let mut tcp_stream =
         TcpStream::connect_timeout(&SOCKET_PATH.parse().unwrap(), timeout)?;
 
-    let start = Instant::now();
+    let mut start = Instant::now();
     let mut megabytes_ps: f64 = 0.0;
 
-    tcp_stream.write(&format.size.to_be_bytes())?;
+    tcp_stream.write(FILE_NAME.as_bytes())?; // send file name
+    tcp_stream.write(&format.size.to_be_bytes())?; //send image size
 
     loop {
         let t0 = Instant::now();
@@ -99,6 +98,8 @@ fn connect(
             println!();
             println!("FPS: {}", meta.sequence as f64 / start.elapsed().as_secs_f64());
             println!("MB/s: {}", megabytes_ps);
+
+            start = Instant::now();
         }
     }
 
@@ -110,7 +111,7 @@ fn main() {
     let (mut stream, format) = get_camera_stream().unwrap();
 
     loop {
-        match connect(&mut stream, &format) {
+        match connect_and_write(&mut stream, &format) {
             Ok(_) => {},
             Err(err) => {
                 println!("Error: {}", err);
