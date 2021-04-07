@@ -1,0 +1,1 @@
+sudo vcdbg set awb_mode 0
